@@ -246,36 +246,36 @@
     /// end auto reload
 
     //attach event handler to all tinymce editors
-//    tinyMCE.on('AddEditor', function(e) {
-//      e.editor.on('blur', function (e) {
-//        ed = e.target;
-//        if (ed.id.includes("comments")){
-//          json_review = JSON.stringify({ "review": ed.getContent({format : 'text'}) })
-//
-//          $.ajax({
-//            url: "http://peerlogic.csc.ncsu.edu/sentiment/visualize_sentiment",
-//            type: "POST",
-//            crossDomain: true,
-//            contentType: "application/json",
-//            data: json_review,
-//            dataType: "html",
-//            success: function (response) {
-//              var toneAnalysisResult = '<div class="panel panel-default">' +
-//                                          '<div class="panel-heading">Tone analysis</div>' +
-//                                          '<div class="panel-body">' + response + '</div>' +
-//                                        '</div>'
-//              if(ed.id.includes("responses"))
-//                  $('#' + ed.id.replace("responses", "analysis")).html(toneAnalysisResult);
-//              else if(ed.id.includes('review_comments'))
-//                  $('#review_comments_analysis').html(toneAnalysisResult);
-//            },
-//            error: function (xhr, status) {
-//              $('#save_progress').html('Unable to reach tone analysis service at the moment')
-//            }
-//          });
-//        }
-//      });
-//    });
+    tinyMCE.on('AddEditor', function(e) {
+      e.editor.on('blur', function (e) {
+        ed = e.target;
+        if (ed.id.includes("comments")){
+          json_review = JSON.stringify({ "review": ed.getContent({format : 'text'}) })
+
+          $.ajax({
+            url: "http://peerlogic.csc.ncsu.edu/sentiment/visualize_sentiment",
+            type: "POST",
+            crossDomain: true,
+            contentType: "application/json",
+            data: json_review,
+            dataType: "html",
+            success: function (response) {
+              var toneAnalysisResult = '<div class="panel panel-default">' +
+                                          '<div class="panel-heading">Tone analysis</div>' +
+                                          '<div class="panel-body">' + response + '</div>' +
+                                        '</div>'
+              if(ed.id.includes("responses"))
+                  $('#' + ed.id.replace("responses", "analysis")).html(toneAnalysisResult);
+              else if(ed.id.includes('review_comments'))
+                  $('#review_comments_analysis').html(toneAnalysisResult);
+            },
+            error: function (xhr, status) {
+              $('#save_progress').html('Unable to reach tone analysis service at the moment')
+            }
+          });
+        }
+      });
+    });
       tinyMCE.on('AddEditor', function(e) {
       e.editor.on('blur', function (e) {
         ed = e.target;
@@ -284,24 +284,36 @@
           console.log(json_review);
 
           $.ajax({
-            url: "https://peer-reviews-nlp.herokuapp.com/suggestions",
+            url: "https://peer-reviews-nlp.herokuapp.com/all",
             type: "POST",
             crossDomain: true,
             contentHeader: "application/javascript",
             contentType: "application/json",
             data: json_review,
-            dataType: "jsonp",
+            dataType: "json",
             success: function (response) {
 	      console.log("success");
-              var toneAnalysisResult = '<div class="panel panel-default">' +
-                                          '<div class="panel-heading"> Suggestion Detection </div>' +
-                                          '<div class="panel-body">' + response + '</div>' +
-                                        '</div>'
+		var rs = JSON.stringify(response);
+		console.log(rs);
+var txt ="";
+var colors = {"Negative": ":</b> <font style=\"color:red;\">", "Positive": ":</b> <font style=\"color:green;\">", "Neutral": ":</b> <font style=\"color:saddlebrown;\">"};
+txt += "<table border='1'>"
+        for (x in response) {
+		if (x == "sentiment_tone")
+{ txt += "<tr><td><b> " + x + colors[response[x]] + response[x] + "</font></td></tr>";}
+	else
+            txt += "<tr><td><b> " + x + ":</b> " +response[x] + "</td></tr>";
+		
+        }
+
+        txt += "</table>"
+console.log(txt);
+//              var suggestAnalysisResult = '<div position:bottom;>'+'<div class="panel panel-default">' +'<div class="panel-heading"> Suggestion Detection </div>'+'<div class="panel-body">' + rs + '</div>' + '</div>'
               console.log(response);
-              if(ed.id.includes("responses"))
-                  $('#' + ed.id.replace("responses", "analysis")).html(toneAnalysisResult);
+             if(ed.id.includes("responses"))
+                  $('#' + ed.id.replace("responses", "analysis")).html(txt);
               else if(ed.id.includes('review_comments'))
-                  $('#review_comments_analysis').html(toneAnalysisResult);
+                 $('#review_comments_analysis').html(txt);
             },
             error: function (xhr, status) {
 		console.log(status)
